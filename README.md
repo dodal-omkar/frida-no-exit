@@ -8,8 +8,6 @@ applications that attempt to exit when tampering, root, emulator,
 or instrumentation is detected.
 
 
-## The Backstory
-
 While testing Android apps, the same pattern kept showing up again and again.
 
 Developers add root/tamper detection → Show a warning → Kill the app.
@@ -20,8 +18,8 @@ But every new app meant writing the same Frida hooks again, just to keep the app
 
 That led to a simple idea: **A universal "No-Die" harness.**
 
-This script does not bypass root checks, emulator detection, or tamper logic directly.
-It simply hooks the exit points because I was getting annoyed at apps closing before I could even attach a debugger.
+This script does not Target bypass root checks, emulator detection, or tamper logic directly by hooking into the Root Logic, But it help us to atchive END GOAL...!!
+It simply hooks the exit points because I was getting annoyed at apps closing before I could even do anything.
 
 **It simply refuses to die.**
 
