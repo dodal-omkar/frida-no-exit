@@ -3,7 +3,7 @@
 A universal Frida Script to **block application termination** at both
 Java and native levels on Android.
 
-Designed for security testing, reverse engineering, and debugging
+Designed for security testing, bypassing root/emulator & other detection, and debugging
 applications that attempt to exit when tampering, root, emulator,
 or instrumentation is detected.
 
