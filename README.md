@@ -10,7 +10,7 @@ or instrumentation is detected.
 
 While testing Android apps, the same pattern kept showing up again and again.
 
-Developers add root/tamper detection → Show a warning → Kill the app.
+Developers add root/tamper detection → show a warning → kill the app.
 
 From a developer’s perspective, that makes sense.  
 From a security tester’s perspective? **It’s an opportunity.**
@@ -37,9 +37,8 @@ The result:
 → The application remains usable
 → Further exploitation becomes possible
 
-The goal is simple: 
-                   Save time, kill the boilerplate, and make reverse engineering less repetitive...!!!
-
+The goal is simple:  
+Save time, kill the boilerplate, and make reverse engineering less repetitive.
 
 
 
