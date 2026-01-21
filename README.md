@@ -41,6 +41,18 @@ The goal is simple:
 Save time, kill the boilerplate, and make reverse engineering less repetitive.
 
 
+## In Action
+
+The screenshot below shows `no-exit-please` actively blocking repeated
+termination attempts from an application that detects a rooted
+environment.
+
+Despite multiple native `_exit(-1)` calls, the process remains alive
+and the application continues running.
+<img width="1895" height="704" alt="image" src="https://github.com/user-attachments/assets/6626da44-8148-4e21-8cbf-535b720d4eae" />
+
+
+
 
 ## Features
 
