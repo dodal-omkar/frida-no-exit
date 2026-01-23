@@ -1,12 +1,15 @@
 # no-exit-please 🛑
 
-A universal Frida Script to **block application termination** at both
-Java and native levels on Android & as a end goal bypasses security checks like root detection.
+A universal Frida script to **block application termination** at both
+Java and native levels on Android — effectively bypassing
+termination-based security mechanisms such as root, emulator,
+and tamper detection.
 
-Designed for security testing, bypassing root/emulator & other detection, and debugging
-applications that attempt to exit when tampering, root, emulator,
-or instrumentation is detected.
+Designed for security testing, reverse engineering, and debugging
+applications that intentionally shut down when security checks
+are triggered.
 
+---
 
 While testing Android apps, the same pattern kept showing up again and again.
 
@@ -15,22 +18,26 @@ Developers add root/tamper detection → show a warning → kill the app.
 From a developer’s perspective, that makes sense.  
 From a security tester’s perspective? **It’s an opportunity.**
 
-But every new app meant writing the same Frida hooks again—just to keep
-the app alive long enough to find the real vulnerabilities.
+Every new app meant rewriting the same Frida hooks just to keep the
+process alive long enough to understand what was actually happening.
 
 That led to a simple idea: **a universal “No-Die” harness.**
+
+---
 
 This script does **not** target or bypass root checks, emulator detection,
 or tamper logic directly by hooking into detection code.
 
 Instead, it focuses on the **end goal**:
-keeping the process alive long enough to observe, trace, and exploit
-the actual logic.
+Instead, it targets the **response**, not the detection.
 
 It simply hooks the exit points-because apps closing before you can
 even do anything gets old fast.
 
 **It simply refuses to die.**
+
+In other words, the detection may still trigger - but it no longer
+achieves its goal.
 
 The result:
 → The process stays alive
@@ -39,6 +46,23 @@ The result:
 
 The goal is simple:  
 Save time, kill the boilerplate, and make reverse engineering less repetitive.
+
+---
+
+## Why This Works
+
+Many Android security implementations rely on **forced termination**
+as the final enforcement step.
+
+If the app cannot exit:
+- security checks lose their impact
+- root/emulator environments remain usable
+- instrumentation can continue uninterrupted
+
+This shifts the focus from fighting individual checks to achieving the
+end goal: **keeping the application running normally**.
+
+---
 
 
 ## In Action
