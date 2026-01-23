@@ -1,7 +1,7 @@
 # no-exit-please 🛑
 
 A universal Frida Script to **block application termination** at both
-Java and native levels on Android.
+Java and native levels on Android & as a end goal bypasses security checks like root detection.
 
 Designed for security testing, bypassing root/emulator & other detection, and debugging
 applications that attempt to exit when tampering, root, emulator,
@@ -27,7 +27,7 @@ Instead, it focuses on the **end goal**:
 keeping the process alive long enough to observe, trace, and exploit
 the actual logic.
 
-It simply hooks the exit points—because apps closing before you can
+It simply hooks the exit points-because apps closing before you can
 even do anything gets old fast.
 
 **It simply refuses to die.**
