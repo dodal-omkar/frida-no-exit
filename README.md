@@ -1,106 +1,118 @@
 # no-exit-please 🛑
 
-A universal Frida script to **block application termination** at both
-Java and native levels on Android — effectively bypassing
-termination-based security mechanisms such as root, emulator,
-and tamper detection.
+A universal Frida script to **bypass application self-termination**
+at both Java and native levels on Android.
 
-Designed for security testing, reverse engineering, and debugging
-applications that intentionally shut down when security checks
-are triggered.
+This effectively bypasses **termination-based security mechanisms**
+commonly used in root detection, emulator detection, tamper detection,
+and instrumentation checks.
 
----
-
-While testing Android apps, the same pattern kept showing up again and again.
-
-Developers add root/tamper detection → show a warning → kill the app.
-
-From a developer’s perspective, that makes sense.  
-From a security tester’s perspective? **It’s an opportunity.**
-
-Every new app meant rewriting the same Frida hooks just to keep the
-process alive long enough to understand what was actually happening.
-
-That led to a simple idea: **a universal “No-Die” harness.**
+Designed for **penetration testing, ethical hacking, reverse engineering,
+and security research** on Android applications that intentionally shut
+themselves down when defensive checks are triggered.
 
 ---
 
-This script does **not** target or bypass root checks, emulator detection,
-or tamper logic directly by hooking into detection code.
+## The Problem
 
-Instead, it focuses on the **end goal**:
-Instead, it targets the **response**, not the detection.
+While testing Android apps, the same pattern appears again and again:
 
-It simply hooks the exit points-because apps closing before you can
-even do anything gets old fast.
+Root / tamper detection → warning screen → app exits.
 
-**It simply refuses to die.**
+From a developer’s perspective, this is a defensive control.  
+From a pentester’s perspective, it is a **fragile enforcement mechanism**.
 
-In other words, the detection may still trigger - but it no longer
-achieves its goal.
+In many real-world apps, detection logic is shallow — but the response
+is aggressive: *terminate the process*.
 
-The result:
-→ The process stays alive
-→ The application remains usable
-→ Further exploitation becomes possible
+Every new target meant rewriting the same Frida hooks just to keep the
+process alive long enough to analyze what was actually happening.
 
-The goal is simple:  
-Save time, kill the boilerplate, and make reverse engineering less repetitive.
+That led to a simple idea:
+
+**If the app cannot exit, the protection fails.**
+
+---
+
+## What This Script Does
+
+`no-exit-please` **bypasses security mechanisms that rely on forced
+application termination** as their final enforcement step.
+
+It does **not** hide root, patch checks, or neutralize detection logic.
+Instead, it **bypasses the impact of those checks** by preventing the
+application from terminating itself.
+
+Detection may still trigger — but it no longer achieves its goal.
+
+**The app keeps running.**
 
 ---
 
 ## Why This Works
 
-Many Android security implementations rely on **forced termination**
-as the final enforcement step.
+Many Android security implementations assume that:
+> “If a risky condition is detected, the app can safely kill itself.”
 
-If the app cannot exit:
-- security checks lose their impact
-- root/emulator environments remain usable
-- instrumentation can continue uninterrupted
+That assumption is wrong.
 
-This shifts the focus from fighting individual checks to achieving the
-end goal: **keeping the application running normally**.
+By intercepting exit paths:
+- root and emulator detections lose their enforcement power
+- instrumentation remains active
+- the application stays usable even on hostile environments
+
+This shifts the attack surface away from bypassing dozens of individual
+checks and toward a single, reliable outcome:
+
+**normal application behavior on a protected app.**
+
+This is not theoretical — it works because developers rely on termination
+as security.
 
 ---
 
-
 ## In Action
 
-The screenshot below shows `no-exit-please` actively blocking repeated
-termination attempts from an application that detects a rooted
-environment.
+The screenshot below shows `no-exit-please` blocking repeated native
+termination attempts (`_exit(-1)`) from an application running in a
+rooted environment.
 
-Despite multiple native `_exit(-1)` calls, the process remains alive
-and the application continues running.
+Despite continuous exit calls, the process remains alive and the app
+continues running.
 <img width="1895" height="704" alt="image" src="https://github.com/user-attachments/assets/6626da44-8148-4e21-8cbf-535b720d4eae" />
 
-
-
+---
 
 ## Features
 
-- **Blocks Java-level exits:**
+- **Bypasses Java-level termination paths**
   - `System.exit()`
   - `Runtime.exit()`
   - `android.os.Process.killProcess()`
   - `android.os.Process.sendSignal()`
-  - `Activity.finish()` / `finishAffinity()` 
-- **Blocks native exits via `libc`:**
+  - `Activity.finish()` / `finishAffinity()`
+
+- **Bypasses native termination via `libc`**
   - `exit`
   - `_exit`
   - `abort`
   - `kill`
-- **Tracing:** Logs Java stack traces when exit attempts occur so you can trace the caller.
+
+- **Execution tracing**
+  - Logs Java stack traces on exit attempts to identify
+    the exact detection logic and call sites
+
+---
 
 ## Usage
 
-**Spawn and hook (Recommended):**
+### Spawn and hook (recommended)
+
 ```bash
-frida -U -f com.target.app -l /PATH/TO/no_exit_please.js
+frida -U -f com.target.app -l no_exit_please.js
 ```
 
-**Or attach to a running process:**
+### Or attach to a running process:
 ```bash
 frida -U -n com.target.app -l no_exit_please.js
 ```
