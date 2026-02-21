@@ -1,15 +1,19 @@
 # no-exit-please 🛑
 
 A universal Frida script to **bypass application self-termination**
-at both Java and native levels on Android.
+at both Java/ART and native levels on Android, and
+Objective-C + native layers on iOS.
 
-This effectively bypasses **termination-based security mechanisms**
-commonly used in root detection, emulator detection, tamper detection,
-and instrumentation checks.
+This neutralizes termination-based security mechanisms commonly used in:
 
-Designed for **penetration testing, ethical hacking, reverse engineering,
-and security research** on Android applications that intentionally shut
-themselves down when defensive checks are triggered.
+Root / Jailbreak detection
+Emulator detection
+Tamper detection
+Instrumentation detection
+Debugger detection
+etc...
+
+Designed for penetration testing, reverse engineering, and mobile security research...
 
 ---
 
@@ -17,20 +21,22 @@ themselves down when defensive checks are triggered.
 
 While testing Android apps, the same pattern appears again and again:
 
-Root / tamper detection → warning screen → app exits.
+**Detect something suspicious → display warning → kill the process**
 
 From a developer’s perspective, this is a defensive control.  
 From a pentester’s perspective, it is a **fragile enforcement mechanism**.
 
-In many real-world apps, detection logic is shallow — but the response
-is aggressive: *terminate the process*.
+Detection logic may vary.
+The enforcement is usually the same: **terminate the app**.
 
-Every new target meant rewriting the same Frida hooks just to keep the
-process alive long enough to analyze what was actually happening.
+Instead of patching dozens of detection functions,
+this harness removes the enforcement mechanism itself.
+
+**If the app cannot terminate, the protection loses impact**
 
 That led to a simple idea:
 
-**If the app cannot exit, the protection fails.**
+**BYPASS EXIT DIRECTLLY**
 
 ---
 
@@ -38,10 +44,6 @@ That led to a simple idea:
 
 `no-exit-please` **bypasses security mechanisms that rely on forced
 application termination** as their final enforcement step.
-
-It does **not** hide root, patch checks, or neutralize detection logic.
-Instead, it **bypasses the impact of those checks** by preventing the
-application from terminating itself.
 
 Detection may still trigger — but it no longer achieves its goal.
 
@@ -54,20 +56,20 @@ Detection may still trigger — but it no longer achieves its goal.
 Many Android security implementations assume that:
 > “If a risky condition is detected, the app can safely kill itself.”
 
-That assumption is wrong.
+That assumption creates a single choke point.
 
-By intercepting exit paths:
-- root and emulator detections lose their enforcement power
-- instrumentation remains active
-- the application stays usable even on hostile environments
+By intercepting termination paths:
+ - Root/jailbreak detection loses enforcement
+ - Instrumentation remains active
+ - The application continues executing
+ - Analysts can inspect full behavior post-detection
 
 This shifts the attack surface away from bypassing dozens of individual
 checks and toward a single, reliable outcome:
 
 **normal application behavior on a protected app.**
 
-This is not theoretical — it works because developers rely on termination
-as security.
+It works because developers rely on termination final state as security.
 
 ---
 
@@ -85,14 +87,15 @@ continues running.
 
 ## Features
 
-- **Bypasses Java-level termination paths**
+### Android Coverage
+- **Java-Level Hooks**
   - `System.exit()`
   - `Runtime.exit()`
   - `android.os.Process.killProcess()`
   - `android.os.Process.sendSignal()`
   - `Activity.finish()` / `finishAffinity()`
 
-- **Bypasses native termination via `libc`**
+- **Native-Level Hooks via `libc`**
   - `exit`
   - `_exit`
   - `abort`
@@ -102,9 +105,25 @@ continues running.
   - Logs Java stack traces on exit attempts to identify
     the exact detection logic and call sites
 
+### iOS Coverage
+ - **Native Hooks**
+  - `exit`
+  - `_exit`
+  - `abort`
+  - `kill`
+  - `pthread_exit`
+  - `__assert_rtn`
+
+ - **Objective-C Hooks**
+  - `UIApplication terminateWithSuccess`
+  - `NSException raise`
+  - `objc_exception_throw`
+
 ---
 
 ## Usage
+
+## Android
 
 ### Spawn and hook (recommended)
 
@@ -114,5 +133,18 @@ frida -U -f com.target.app -l no_exit_please.js
 
 ### Or attach to a running process:
 ```bash
-frida -U -n com.target.app -l no_exit_please.js
+frida -U -N com.target.app -l no_exit_please.js
+```
+
+## iOS
+
+### Spawn and hook (recommended)
+
+```bash
+frida -U -f com.target.app -l no_exit_please_ios.js
+```
+
+### Or attach to a running process:
+```bash
+frida -U -N com.target.app -l no_exit_please_ios.js
 ```
